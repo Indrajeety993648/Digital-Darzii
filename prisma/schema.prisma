@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model GenerationRequest {
+  id               String    @id @default(cuid())
+  status           String    @default("queued")
+  clothingImageUrl String
+  modelImageUrl    String?
+  resultImageUrl   String?
+  modelGender      String    @default("female")
+  modelBodyType    String    @default("m")
+  modelSkinTone    String    @default("medium")
+  modelPose        String    @default("front")
+  backgroundStyle  String    @default("studio_white")
+  stylePrompt      String?
+  processingStage  String?
+  processingTimeMs Int?
+  errorMessage     String?
+  createdAt        DateTime  @default(now())
+  completedAt      DateTime?
+
+  @@map("generation_requests")
+}
+
+model ModelTemplate {
+  id        String  @id @default(cuid())
+  gender    String
+  bodyType  String
+  skinTone  String
+  pose      String
+  category  String
+  imageUrl  String
+  isActive  Boolean @default(true)
+
+  @@map("model_templates")
+}

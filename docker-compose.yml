@@ -1,0 +1,31 @@
+version: "3.9"
+
+# Optional: use this to run the AI service in Docker
+# For local dev, running ai-service directly with uvicorn is simpler
+
+services:
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: digital-darzi-ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./public/uploads:/app/uploads:ro
+      - ./public/results:/app/results:rw
+      - ./public/templates:/app/templates:ro
+      - ai_models:/root/.cache/huggingface
+    environment:
+      GPU_MODE: "false"
+    # Uncomment for GPU support:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  ai_models:
