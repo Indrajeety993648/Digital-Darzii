@@ -1,1 +1,6 @@
-# pnpm workspace config
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
+  - sharp

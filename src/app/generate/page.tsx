@@ -7,18 +7,22 @@ import { ModelUploadZone } from "@/components/generate/ModelUploadZone";
 import { StylePromptInput } from "@/components/generate/StylePromptInput";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Sparkles, ChevronRight, Shirt, User } from "lucide-react";
+import { Sparkles, ChevronRight, Shirt, User, Tag } from "lucide-react";
 
 interface FormState {
   garmentUrl: string | null;
   modelUrl: string | null;
   stylePrompt: string;
+  garmentCategory: "upper_body" | "lower_body" | "dresses";
+  garmentDescription: string;
 }
 
 const defaultForm: FormState = {
   garmentUrl: null,
   modelUrl: null,
   stylePrompt: "",
+  garmentCategory: "upper_body",
+  garmentDescription: "",
 };
 
 export default function GeneratePage() {
@@ -44,6 +48,8 @@ export default function GeneratePage() {
           clothingImageUrl: form.garmentUrl,
           modelImageUrl: form.modelUrl,
           stylePrompt: form.stylePrompt || undefined,
+          garmentCategory: form.garmentCategory,
+          garmentDescription: form.garmentDescription || undefined,
         }),
       });
       const data = await res.json();
@@ -106,13 +112,65 @@ export default function GeneratePage() {
               </div>
             </div>
 
-            {/* Section 3: Style Prompt */}
+            {/* Section 3: Garment Category & Description */}
             <div className={cn(
               "bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm transition-all duration-500",
               !form.garmentUrl && "opacity-50 pointer-events-none"
             )}>
               <h2 className="font-display text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-                <span className="size-7 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center text-sm font-bold">3</span>
+                <span className="size-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold">3</span>
+                <Tag className="size-4 text-emerald-500" />
+                Garment Details
+              </h2>
+
+              {/* Category selector */}
+              <div className="mb-4">
+                <label className="text-sm font-semibold text-zinc-700 mb-2 block">Category</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { value: "upper_body" as const, label: "Upper Body", emoji: "👕" },
+                    { value: "lower_body" as const, label: "Lower Body", emoji: "👖" },
+                    { value: "dresses" as const, label: "Dresses", emoji: "👗" },
+                  ]).map((cat) => (
+                    <button
+                      key={cat.value}
+                      onClick={() => updateForm({ garmentCategory: cat.value })}
+                      className={cn(
+                        "p-3 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all text-sm font-medium",
+                        form.garmentCategory === cat.value
+                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50"
+                      )}
+                    >
+                      <span className="text-xl">{cat.emoji}</span>
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Garment description */}
+              <div>
+                <label className="text-sm font-semibold text-zinc-700 mb-2 block">
+                  Garment Description <span className="text-zinc-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.garmentDescription}
+                  onChange={(e) => updateForm({ garmentDescription: e.target.value })}
+                  placeholder="e.g. Short Sleeve Round Neck T-shirt"
+                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Section 4: Style Prompt */}
+            <div className={cn(
+              "bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm transition-all duration-500",
+              !form.garmentUrl && "opacity-50 pointer-events-none"
+            )}>
+              <h2 className="font-display text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
+                <span className="size-7 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center text-sm font-bold">4</span>
                 Style Prompt{" "}
                 <span className="text-zinc-400 font-normal text-sm">(optional)</span>
               </h2>
@@ -129,8 +187,8 @@ export default function GeneratePage() {
                   {!form.garmentUrl && !form.modelUrl
                     ? "Upload both a garment and a model photo to continue"
                     : !form.garmentUrl
-                    ? "Upload a garment photo to continue"
-                    : "Upload a model photo to continue"}
+                      ? "Upload a garment photo to continue"
+                      : "Upload a model photo to continue"}
                 </p>
               )}
               <button
@@ -219,10 +277,10 @@ export default function GeneratePage() {
               <h4 className="font-semibold text-zinc-900 text-sm mb-3">How it works</h4>
               <ol className="space-y-2">
                 {[
-                  "Garment background is removed",
-                  "Garment is detected and segmented",
-                  "AI fits it naturally onto your model",
-                  "Result is enhanced and saved",
+                  "Body pose & garment region detected",
+                  "DensePose maps body surface",
+                  "IDM-VTON fits the garment via diffusion",
+                  "Result is saved and ready to download",
                 ].map((step, i) => (
                   <li key={step} className="flex items-start gap-2.5 text-xs text-zinc-600">
                     <span className="size-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">

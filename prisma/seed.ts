@@ -11,6 +11,8 @@ const templates = [
   { gender: "female", bodyType: "l", skinTone: "dark", pose: "front", category: "western", imageUrl: "/templates/female_large_front.jpg" },
   { gender: "male", bodyType: "l", skinTone: "dark", pose: "front", category: "ethnic_male", imageUrl: "/templates/male_large_front.jpg" },
   { gender: "female", bodyType: "m", skinTone: "deep", pose: "side", category: "western", imageUrl: "/templates/female_medium_side.jpg" },
+  { gender: "female", bodyType: "m", skinTone: "medium", pose: "mock", category: "western", imageUrl: "/mock/female-model.jpeg" },
+  { gender: "female", bodyType: "m", skinTone: "medium", pose: "mock-2", category: "western", imageUrl: "/mock/female-model-2.jpeg" },
 ];
 
 async function main() {

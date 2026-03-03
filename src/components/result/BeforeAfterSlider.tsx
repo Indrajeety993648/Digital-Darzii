@@ -23,7 +23,7 @@ export function BeforeAfterSlider({ beforeSrc, afterSrc, height = 500 }: BeforeA
           <ReactCompareSliderImage
             src={afterSrc}
             alt="Generated result"
-            style={{ objectFit: "cover" }}
+            style={{ objectFit: "contain", background: "#f4f4f5" }}
           />
         }
         handle={

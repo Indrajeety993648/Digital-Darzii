@@ -6,6 +6,12 @@ const generateSchema = z.object({
   clothingImageUrl: z.string().min(1),
   modelImageUrl: z.string().min(1),
   stylePrompt: z.string().optional(),
+  garmentCategory: z.enum(["upper_body", "lower_body", "dresses"]).optional().default("upper_body"),
+  garmentDescription: z.string().optional(),
+  denoiseSteps: z.number().min(20).max(40).optional().default(30),
+  seed: z.number().optional().default(42),
+  autoCrop: z.boolean().optional().default(true),
+  autoMask: z.boolean().optional().default(true),
 });
 
 async function processGeneration(generationId: string, data: z.infer<typeof generateSchema>) {
@@ -15,28 +21,34 @@ async function processGeneration(generationId: string, data: z.infer<typeof gene
       data: { status: "processing", processingStage: "uploading" },
     });
 
-    const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? "http://localhost:8000";
+    // Configurable delay to simulate AI processing time (in milliseconds)
+    // Change this value to make the loading sequence faster or slower
+    const MOCK_DELAY_MS = 42343;
+
     const startTime = Date.now();
+    console.log("Mock Processing - ID:", generationId);
+    console.log("Clothing URL:", data.clothingImageUrl);
+    console.log("Model URL:", data.modelImageUrl);
 
-    const aiResponse = await fetch(`${AI_SERVICE_URL}/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        job_id: generationId,
-        clothing_image_path: data.clothingImageUrl,
-        template_image_path: data.modelImageUrl,
-        preferences: {},
-        style_prompt: data.stylePrompt ?? null,
-        output_filename: `${generationId}.jpg`,
-      }),
-      signal: AbortSignal.timeout(300_000),
-    });
+    // Simulate the network delay for AI processing
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
-    if (!aiResponse.ok) {
-      throw new Error(`AI service error: ${aiResponse.statusText}`);
+    // Mock the AI response mapping inputs to outputs
+    let resultImage = "/mock/final-output-female.jpeg"; // Set 1 Default
+
+    // Detection logic for Set 2:
+    const isSet2Model = data.modelImageUrl.includes("female-model-2") || data.modelImageUrl.includes("mock-2");
+    const isSet2Garment = data.clothingImageUrl.includes("cloth-2");
+    const isDressCategory = data.garmentCategory === "dresses";
+
+    if (isSet2Model || isSet2Garment || isDressCategory) {
+      resultImage = "/mock/output-2.jpeg";
     }
 
-    const aiResult = await aiResponse.json();
+    const aiResult = {
+      result_path: resultImage
+    };
+
     const processingTimeMs = Date.now() - startTime;
 
     await db.generationRequest.update({

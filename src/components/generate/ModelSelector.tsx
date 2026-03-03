@@ -30,9 +30,9 @@ const poses = [
   { value: "front", label: "Front", emoji: "🧍" },
   { value: "side", label: "Side", emoji: "🧍" },
   { value: "casual", label: "Casual", emoji: "💃" },
-  { value: "formal", label: "Formal", emoji: "🎩" },
   { value: "ethnic", label: "Ethnic", emoji: "🥻" },
-  { value: "saree", label: "Saree", emoji: "🌸" },
+  { value: "mock", label: "Mock 1", emoji: "🧪" },
+  { value: "mock-2", label: "Mock 2", emoji: "🧪" },
 ];
 
 const backgrounds = [
