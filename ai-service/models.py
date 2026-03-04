@@ -9,12 +9,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 GPU_MODE = os.environ.get("GPU_MODE", "false").lower() == "true"
+MOCK_MODE = os.environ.get("MOCK_MODE", "false").lower() == "true"
 
 _cache: dict = {}
 
 
 def get_rembg_session():
     """rembg background removal - works on CPU too."""
+    if MOCK_MODE:
+        return None
     if "rembg" not in _cache:
         logger.info("Loading rembg model (U2-Net)...")
         from rembg import new_session
@@ -83,6 +86,9 @@ def get_realesrgan():
 
 def warmup_models():
     """Pre-load models at startup. Safe to call in both GPU and CPU modes."""
+    if MOCK_MODE:
+        logger.info("MOCK_MODE is enabled, skipping model warmup.")
+        return
     try:
         get_rembg_session()  # always load this
         if GPU_MODE:
