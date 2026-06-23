@@ -70,15 +70,15 @@ export function UploadZone({ onUpload, currentImage, onRemove }: UploadZoneProps
 
   if (currentImage) {
     return (
-      <div className="relative group rounded-xl overflow-hidden border-2 border-indigo-200 bg-indigo-50 aspect-square max-w-xs mx-auto">
+      <div className="relative group rounded-xl overflow-hidden border border-white/20 bg-black aspect-square max-w-xs mx-auto">
         <img src={currentImage} alt="Uploaded garment" className="w-full h-full object-contain" />
         <button
           onClick={onRemove}
-          className="absolute top-2 right-2 size-8 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-zinc-700 hover:text-red-500 hover:bg-red-50 transition-colors"
+          className="absolute top-2 right-2 size-8 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white/70 hover:bg-red-500/20 hover:text-red-400 transition-colors"
         >
           <X className="size-4" />
         </button>
-        <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-green-500 text-white text-xs font-medium flex items-center gap-1">
+        <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-white/10 text-white/60 text-xs font-medium flex items-center gap-1">
           <span className="size-1.5 rounded-full bg-white" />
           Image ready
         </div>
@@ -94,8 +94,8 @@ export function UploadZone({ onUpload, currentImage, onRemove }: UploadZoneProps
           "relative rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer",
           "flex flex-col items-center justify-center p-12 gap-4 text-center",
           isDragActive
-            ? "border-indigo-500 bg-indigo-50 scale-[1.02]"
-            : "border-zinc-300 bg-zinc-50 hover:border-indigo-400 hover:bg-indigo-50/50",
+            ? "border-white/40 bg-white/10 scale-[1.02]"
+            : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]",
           isUploading && "pointer-events-none"
         )}
       >
@@ -105,34 +105,31 @@ export function UploadZone({ onUpload, currentImage, onRemove }: UploadZoneProps
           <div className="flex flex-col items-center gap-4">
             <div className="relative size-16">
               <svg className="size-16 -rotate-90" viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" strokeWidth="4" />
+                <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
                 <circle
                   cx="32" cy="32" r="28" fill="none"
-                  stroke="#6366f1" strokeWidth="4" strokeLinecap="round"
+                  stroke="#fff" strokeWidth="4" strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 28}`}
                   strokeDashoffset={`${2 * Math.PI * 28 * (1 - progress / 100)}`}
                   className="transition-all duration-200"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold text-indigo-600">{progress}%</span>
+                <span className="text-sm font-bold text-white">{progress}%</span>
               </div>
             </div>
-            <p className="text-zinc-600 font-medium">Uploading...</p>
+            <p className="text-white/70 font-medium">Uploading...</p>
           </div>
         ) : (
           <>
-            <div className={cn(
-              "size-16 rounded-2xl flex items-center justify-center transition-colors",
-              isDragActive ? "bg-indigo-100" : "bg-zinc-100"
-            )}>
-              <Upload className={cn("size-7", isDragActive ? "text-indigo-600" : "text-zinc-400")} />
+            <div className="size-16 rounded-2xl flex items-center justify-center">
+              <Upload className={cn("size-7", isDragActive ? "text-white/60" : "text-white/30")} />
             </div>
             <div>
-              <p className="font-semibold text-zinc-700 mb-1">
+              <p className="font-semibold text-white/70 mb-1">
                 {isDragActive ? "Drop it here!" : "Drop your image or click to browse"}
               </p>
-              <p className="text-sm text-zinc-400">JPEG, PNG, WebP — Max 10MB</p>
+              <p className="text-sm text-white/40">JPEG, PNG, WebP — Max 10MB</p>
             </div>
           </>
         )}

@@ -22,10 +22,10 @@ export function StylePromptInput({ value, onChange }: StylePromptInputProps) {
         onChange={(e) => onChange(e.target.value)}
         placeholder="Describe the look you want... (e.g., soft lighting, festive background, elegant styling)"
         rows={3}
-        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 placeholder-zinc-400 text-sm resize-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+        className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 text-sm resize-none focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all"
       />
       <div>
-        <p className="text-xs text-zinc-400 mb-2 font-medium">Quick suggestions:</p>
+        <p className="text-xs text-white/30 mb-2 font-medium">Quick suggestions:</p>
         <div className="flex flex-wrap gap-2">
           {suggestions.map((s) => (
             <motion.button
@@ -36,8 +36,8 @@ export function StylePromptInput({ value, onChange }: StylePromptInputProps) {
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
                 value === s
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white text-zinc-600 border-zinc-200 hover:border-indigo-300 hover:text-indigo-600"
+                  ? "bg-white text-black border-white"
+                  : "bg-white/5 text-white/50 border-white/10 hover:border-white/20 hover:text-white/70"
               )}
             >
               {s}

@@ -2,13 +2,10 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Scissors } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
-  const isLanding = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -19,26 +16,16 @@ export function Navbar() {
 
   return (
     <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-        isLanding
-          ? scrolled
-            ? "bg-black/80 backdrop-blur-xl border-b border-white/10"
-            : "bg-transparent"
-          : "bg-white/80 backdrop-blur-xl border-b border-zinc-200"
-      )}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-black/80 backdrop-blur-xl border-b border-white/10"
+          : "bg-transparent"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Scissors
-            className={cn("size-5", isLanding ? "text-indigo-400" : "text-indigo-600")}
-          />
-          <span
-            className={cn(
-              "font-display text-lg font-semibold tracking-tight",
-              isLanding ? "text-white" : "text-zinc-900"
-            )}
-          >
+          <Scissors className="size-5 text-white/60" />
+          <span className="font-display text-lg font-semibold tracking-tight text-white">
             Digital Darzi
           </span>
         </Link>
@@ -52,26 +39,20 @@ export function Navbar() {
             <Link
               key={href}
               href={href}
-              className={cn(
-                "text-sm font-medium transition-colors",
-                isLanding
-                  ? "text-white/70 hover:text-white"
-                  : "text-zinc-600 hover:text-zinc-900",
-                pathname === href && (isLanding ? "text-white" : "text-zinc-900")
-              )}
+              className={`text-sm font-medium transition-colors ${
+                pathname === href ? "text-white" : "text-white/60 hover:text-white"
+              }`}
             >
               {label}
             </Link>
           ))}
         </nav>
 
-        <Link href="/generate">
-          <Button
-            size="sm"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-lg shadow-indigo-500/25"
-          >
-            Try Now
-          </Button>
+        <Link
+          href="/generate"
+          className="bg-white text-black hover:bg-white/90 font-medium text-sm px-4 py-2 rounded-md transition-colors"
+        >
+          Try Now
         </Link>
       </div>
     </header>
