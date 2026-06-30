@@ -1,18 +1,17 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/shared/Navbar";
 import { UploadZone } from "@/components/generate/UploadZone";
 import { ModelUploadZone } from "@/components/generate/ModelUploadZone";
-import { StylePromptInput } from "@/components/generate/StylePromptInput";
+
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Sparkles, ChevronRight, Shirt, User, Tag } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface FormState {
   garmentUrl: string | null;
   modelUrl: string | null;
-  stylePrompt: string;
   garmentCategory: "upper_body" | "lower_body" | "dresses";
   garmentDescription: string;
 }
@@ -20,7 +19,6 @@ interface FormState {
 const defaultForm: FormState = {
   garmentUrl: null,
   modelUrl: null,
-  stylePrompt: "",
   garmentCategory: "upper_body",
   garmentDescription: "",
 };
@@ -31,10 +29,53 @@ export default function GeneratePage() {
   const [form, setForm] = useState<FormState>(defaultForm);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const pageRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const rightColRef = useRef<HTMLDivElement>(null);
+
   const isReady = !!form.garmentUrl && !!form.modelUrl;
 
   const updateForm = useCallback((updates: Partial<FormState>) => {
     setForm((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  useEffect(() => {
+    const loadAndAnimate = async () => {
+      const gsap = (await import("gsap")).default;
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
+
+      const ctx = gsap.context(() => {
+        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+        tl.fromTo(
+          headingRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.8 }
+        );
+
+        if (leftColRef.current) {
+          tl.fromTo(
+            Array.from(leftColRef.current.children),
+            { opacity: 0, y: 40 },
+            { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 },
+            "-=0.4"
+          );
+        }
+
+        tl.fromTo(
+          rightColRef.current,
+          { opacity: 0, x: 40 },
+          { opacity: 1, x: 0, duration: 0.8 },
+          "-=0.6"
+        );
+      }, pageRef);
+
+      return () => ctx.revert();
+    };
+
+    loadAndAnimate();
   }, []);
 
   const handleGenerate = async () => {
@@ -47,7 +88,6 @@ export default function GeneratePage() {
         body: JSON.stringify({
           clothingImageUrl: form.garmentUrl,
           modelImageUrl: form.modelUrl,
-          stylePrompt: form.stylePrompt || undefined,
           garmentCategory: form.garmentCategory,
           garmentDescription: form.garmentDescription || undefined,
         }),
@@ -63,28 +103,41 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div ref={pageRef} className="min-h-screen bg-[#0A0A0A] text-white">
+      {/* Grid overlay */}
+      <div
+        className="fixed inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
       <Navbar />
-      <div className="max-w-7xl mx-auto px-6 pt-24 pb-16">
-        <div className="mb-10">
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-zinc-900 mb-2">
-            Virtual Try-On
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-20">
+        {/* Header */}
+        <div ref={headingRef} className="mb-12 opacity-0">
+          <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight text-white mb-3">
+            Virtual Try-On Studio
           </h1>
-          <p className="text-zinc-500">
-            Upload a garment photo and a model photo — we&apos;ll fit the garment onto the model naturally.
+          <p className="text-zinc-500 text-lg max-w-xl">
+            Upload a garment and a model photo — we&apos;ll fit the garment onto the model naturally.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10">
           {/* LEFT — Form */}
-          <div className="space-y-8">
-            {/* Two uploads side by side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div ref={leftColRef} className="space-y-6">
+            {/* Upload cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Garment upload */}
-              <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm">
-                <h2 className="font-display text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-                  <span className="size-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">1</span>
-                  <Shirt className="size-4 text-indigo-500" />
+              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6">
+                <h2 className="font-display text-base font-semibold text-white mb-4 flex items-center gap-3">
+                  <span className="size-6 rounded-full bg-white/10 text-white/70 flex items-center justify-center text-xs font-bold">
+                    1
+                  </span>
                   Garment Photo
                 </h2>
                 <UploadZone
@@ -92,16 +145,17 @@ export default function GeneratePage() {
                   currentImage={form.garmentUrl}
                   onRemove={() => updateForm({ garmentUrl: null })}
                 />
-                <p className="mt-3 text-xs text-zinc-400 text-center">
+                <p className="mt-3 text-xs text-zinc-600 text-center">
                   Flat-lay or hanger shot — white background preferred
                 </p>
               </div>
 
               {/* Model upload */}
-              <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm">
-                <h2 className="font-display text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-                  <span className="size-7 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-sm font-bold">2</span>
-                  <User className="size-4 text-violet-500" />
+              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6">
+                <h2 className="font-display text-base font-semibold text-white mb-4 flex items-center gap-3">
+                  <span className="size-6 rounded-full bg-white/10 text-white/70 flex items-center justify-center text-xs font-bold">
+                    2
+                  </span>
                   Model Photo
                 </h2>
                 <ModelUploadZone
@@ -112,37 +166,39 @@ export default function GeneratePage() {
               </div>
             </div>
 
-            {/* Section 3: Garment Category & Description */}
-            <div className={cn(
-              "bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm transition-all duration-500",
-              !form.garmentUrl && "opacity-50 pointer-events-none"
-            )}>
-              <h2 className="font-display text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-                <span className="size-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold">3</span>
-                <Tag className="size-4 text-emerald-500" />
+            {/* Garment Details */}
+            <div
+              className={cn(
+                "bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6 transition-all duration-500",
+                !form.garmentUrl && "opacity-40 pointer-events-none"
+              )}
+            >
+              <h2 className="font-display text-base font-semibold text-white mb-5 flex items-center gap-3">
+                <span className="size-6 rounded-full bg-white/10 text-white/70 flex items-center justify-center text-xs font-bold">
+                  3
+                </span>
                 Garment Details
               </h2>
 
-              {/* Category selector */}
-              <div className="mb-4">
-                <label className="text-sm font-semibold text-zinc-700 mb-2 block">Category</label>
-                <div className="grid grid-cols-3 gap-2">
+              {/* Category selector — pill buttons */}
+              <div className="mb-5">
+                <label className="text-sm font-medium text-zinc-400 mb-3 block">Category</label>
+                <div className="flex gap-2">
                   {([
-                    { value: "upper_body" as const, label: "Upper Body", emoji: "👕" },
-                    { value: "lower_body" as const, label: "Lower Body", emoji: "👖" },
-                    { value: "dresses" as const, label: "Dresses", emoji: "👗" },
+                    { value: "upper_body" as const, label: "Upper Body" },
+                    { value: "lower_body" as const, label: "Lower Body" },
+                    { value: "dresses" as const, label: "Dresses" },
                   ]).map((cat) => (
                     <button
                       key={cat.value}
                       onClick={() => updateForm({ garmentCategory: cat.value })}
                       className={cn(
-                        "p-3 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all text-sm font-medium",
+                        "px-4 py-2 rounded-full text-sm font-medium transition-all",
                         form.garmentCategory === cat.value
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50"
+                          ? "bg-white text-black"
+                          : "bg-white/[0.05] text-zinc-400 border border-white/[0.08] hover:bg-white/[0.08] hover:text-zinc-300"
                       )}
                     >
-                      <span className="text-xl">{cat.emoji}</span>
                       {cat.label}
                     </button>
                   ))}
@@ -151,39 +207,23 @@ export default function GeneratePage() {
 
               {/* Garment description */}
               <div>
-                <label className="text-sm font-semibold text-zinc-700 mb-2 block">
-                  Garment Description <span className="text-zinc-400 font-normal">(optional)</span>
+                <label className="text-sm font-medium text-zinc-400 mb-2 block">
+                  Description <span className="text-zinc-600">(optional)</span>
                 </label>
                 <input
                   type="text"
                   value={form.garmentDescription}
                   onChange={(e) => updateForm({ garmentDescription: e.target.value })}
                   placeholder="e.g. Short Sleeve Round Neck T-shirt"
-                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:border-white/20 transition-all"
                 />
               </div>
-            </div>
-
-            {/* Section 4: Style Prompt */}
-            <div className={cn(
-              "bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm transition-all duration-500",
-              !form.garmentUrl && "opacity-50 pointer-events-none"
-            )}>
-              <h2 className="font-display text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-                <span className="size-7 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center text-sm font-bold">4</span>
-                Style Prompt{" "}
-                <span className="text-zinc-400 font-normal text-sm">(optional)</span>
-              </h2>
-              <StylePromptInput
-                value={form.stylePrompt}
-                onChange={(v) => updateForm({ stylePrompt: v })}
-              />
             </div>
 
             {/* Generate Button */}
             <div>
               {!isReady && (
-                <p className="text-center text-sm text-zinc-400 mb-3">
+                <p className="text-center text-sm text-zinc-600 mb-3">
                   {!form.garmentUrl && !form.modelUrl
                     ? "Upload both a garment and a model photo to continue"
                     : !form.garmentUrl
@@ -195,10 +235,10 @@ export default function GeneratePage() {
                 onClick={handleGenerate}
                 disabled={!isReady || isGenerating}
                 className={cn(
-                  "w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all",
+                  "w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200",
                   isReady && !isGenerating
-                    ? "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5"
-                    : "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                    ? "bg-white text-black hover:bg-zinc-100 hover:-translate-y-0.5 shadow-lg shadow-white/10"
+                    : "bg-white/[0.05] text-zinc-600 border border-white/[0.06] cursor-not-allowed"
                 )}
               >
                 {isGenerating ? (
@@ -207,13 +247,12 @@ export default function GeneratePage() {
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
                       <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                     </svg>
-                    Starting generation...
+                    Generating...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="size-5" />
-                    Fit Garment on Model
-                    <ChevronRight className="size-5" />
+                    Generate Try-On
+                    <ArrowRight className="size-4" />
                   </>
                 )}
               </button>
@@ -221,69 +260,87 @@ export default function GeneratePage() {
           </div>
 
           {/* RIGHT — Preview Panel */}
-          <div className="lg:sticky lg:top-24 self-start space-y-4">
-            <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm">
-              <h3 className="font-semibold text-zinc-900 mb-4">Preview</h3>
+          <div ref={rightColRef} className="lg:sticky lg:top-28 self-start space-y-4 opacity-0">
+            <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6">
+              <h3 className="font-semibold text-white text-sm mb-4 tracking-wide uppercase">
+                Preview
+              </h3>
 
               {form.garmentUrl && form.modelUrl ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 text-center">Garment</p>
-                      <div className="rounded-xl overflow-hidden bg-zinc-100 aspect-square">
+                      <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 text-center">
+                        Garment
+                      </p>
+                      <div className="rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] aspect-square">
                         <img src={form.garmentUrl} alt="Garment" className="w-full h-full object-contain" />
                       </div>
                     </div>
                     <div>
-                      <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 text-center">Model</p>
-                      <div className="rounded-xl overflow-hidden bg-zinc-100 aspect-square">
+                      <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 text-center">
+                        Model
+                      </p>
+                      <div className="rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] aspect-square">
                         <img src={form.modelUrl} alt="Model" className="w-full h-full object-cover" />
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-2 py-2">
-                    <div className="h-px flex-1 bg-zinc-200" />
-                    <Sparkles className="size-4 text-indigo-500" />
-                    <div className="h-px flex-1 bg-zinc-200" />
+                  <div className="flex items-center justify-center gap-3 py-2">
+                    <div className="h-px flex-1 bg-white/[0.06]" />
+                    <ArrowRight className="size-3.5 text-zinc-600" />
+                    <div className="h-px flex-1 bg-white/[0.06]" />
                   </div>
-                  <div className="rounded-xl bg-zinc-100 aspect-square flex items-center justify-center">
-                    <p className="text-zinc-400 text-sm text-center px-4">Result will appear here after generation</p>
+                  <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] aspect-square flex items-center justify-center">
+                    <p className="text-zinc-600 text-sm text-center px-4">
+                      Result appears after generation
+                    </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-100">
-                    <p className="text-amber-700 text-xs font-medium text-center">Estimated time: ~5–40 seconds</p>
+                  <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                    <p className="text-zinc-500 text-xs font-medium text-center">
+                      Estimated: ~5-40 seconds
+                    </p>
                   </div>
                 </div>
               ) : form.garmentUrl ? (
                 <div className="space-y-3">
                   <div>
-                    <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 text-center">Garment</p>
-                    <div className="rounded-xl overflow-hidden bg-zinc-100 aspect-square">
+                    <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 text-center">
+                      Garment
+                    </p>
+                    <div className="rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] aspect-square">
                       <img src={form.garmentUrl} alt="Garment" className="w-full h-full object-contain" />
                     </div>
                   </div>
-                  <div className="rounded-xl bg-violet-50 border-2 border-dashed border-violet-200 aspect-[3/4] flex items-center justify-center">
-                    <p className="text-violet-400 text-sm text-center px-4">Upload a model photo →</p>
+                  <div className="rounded-xl border border-dashed border-white/[0.1] aspect-[3/4] flex items-center justify-center">
+                    <p className="text-zinc-600 text-sm text-center px-4">
+                      Upload a model photo
+                    </p>
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl bg-zinc-50 border-2 border-dashed border-zinc-200 aspect-square flex items-center justify-center">
-                  <p className="text-zinc-400 text-sm text-center px-4">Upload images to see preview</p>
+                <div className="rounded-xl border border-dashed border-white/[0.1] aspect-square flex items-center justify-center">
+                  <p className="text-zinc-600 text-sm text-center px-4">
+                    Upload images to see preview
+                  </p>
                 </div>
               )}
             </div>
 
             {/* How it works */}
-            <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
-              <h4 className="font-semibold text-zinc-900 text-sm mb-3">How it works</h4>
-              <ol className="space-y-2">
+            <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-5">
+              <h4 className="font-semibold text-zinc-400 text-xs mb-3 uppercase tracking-wider">
+                How it works
+              </h4>
+              <ol className="space-y-2.5">
                 {[
                   "Body pose & garment region detected",
                   "DensePose maps body surface",
                   "IDM-VTON fits the garment via diffusion",
-                  "Result is saved and ready to download",
+                  "Result saved and ready to download",
                 ].map((step, i) => (
-                  <li key={step} className="flex items-start gap-2.5 text-xs text-zinc-600">
-                    <span className="size-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                  <li key={step} className="flex items-start gap-2.5 text-xs text-zinc-500">
+                    <span className="size-4 rounded-full bg-white/[0.06] text-zinc-500 flex items-center justify-center text-[10px] font-medium shrink-0 mt-0.5">
                       {i + 1}
                     </span>
                     {step}
