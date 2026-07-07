@@ -12,15 +12,6 @@ export function CTA() {
       gsap.registerPlugin(ScrollTrigger);
 
       const ctx = gsap.context(() => {
-        // Animated gradient position
-        gsap.to(sectionRef.current, {
-          backgroundPosition: "100% 50%",
-          duration: 4,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-
         const ctaItems = sectionRef.current?.querySelectorAll(".cta-content > *");
         if (ctaItems && ctaItems.length > 0) {
           gsap.fromTo(
@@ -40,35 +31,23 @@ export function CTA() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4c1d95 50%, #6d28d9 75%, #7c3aed 100%)",
-        backgroundSize: "200% 200%",
-        backgroundPosition: "0% 50%",
-      }}
+      className="relative py-32 overflow-hidden bg-[#0F0F0F]"
     >
-      {/* Noise texture overlay */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E\")"
-      }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-white/[0.04] rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center cta-content">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm font-medium mb-8">
-          <span className="size-2 rounded-full bg-green-400 animate-pulse" />
-          Free during beta
-        </div>
-        <h2 className="font-display text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-          Ready to Transform Your Product Photos?
+      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center cta-content">
+        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          Ship better product photos today
         </h2>
-        <p className="text-white/70 text-xl mb-10 max-w-2xl mx-auto">
-          Join thousands of Indian fashion sellers already using AI to create studio-quality product photos.
+        <p className="text-zinc-500 text-lg mb-10 max-w-xl mx-auto">
+          5 free generations. No credit card. Results in under a minute.
         </p>
         <Link
           href="/generate"
-          className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl bg-white text-indigo-700 font-bold text-lg hover:bg-white/90 transition-all shadow-2xl hover:shadow-white/20 hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-white text-black font-semibold text-base hover:bg-white/90 transition-all shadow-2xl shadow-white/[0.05] hover:-translate-y-0.5"
         >
-          Start Generating — It&apos;s Free
-          <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          Try it free
+          <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Link>

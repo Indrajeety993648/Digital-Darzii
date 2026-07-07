@@ -1,6 +1,5 @@
 "use client";
 import { useRef, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -79,19 +78,6 @@ export function Pricing() {
     });
   }, []);
 
-  const handle3DTilt = useCallback(async (e: React.MouseEvent<HTMLDivElement>, cardEl: HTMLDivElement) => {
-    const gsap = (await import("gsap")).default;
-    const rect = cardEl.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
-    gsap.to(cardEl, { rotateX: y, rotateY: x, duration: 0.4, ease: "power2.out", transformPerspective: 800 });
-  }, []);
-
-  const handleTiltReset = useCallback(async (cardEl: HTMLDivElement) => {
-    const gsap = (await import("gsap")).default;
-    gsap.to(cardEl, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "elastic.out(1, 0.4)" });
-  }, []);
-
   return (
     <section ref={sectionRef} id="pricing" className="py-32 bg-[#0A0A0A]">
       <div className="max-w-6xl mx-auto px-6">
@@ -106,18 +92,20 @@ export function Pricing() {
           {plans.map((plan, i) => (
             <div
               key={i}
-              className={`pricing-card relative rounded-2xl p-8 flex flex-col gap-6 transition-shadow ${
+              className={`pricing-card group relative rounded-2xl p-8 flex flex-col gap-6 transition-all duration-300 ${
                 plan.highlighted
-                  ? "bg-white/10 border-2 border-indigo-500 shadow-2xl shadow-indigo-500/20"
-                  : "bg-white/5 border border-white/10"
+                  ? "border-2 border-white/30 shadow-[0_0_60px_rgba(255,255,255,0.05)]"
+                  : "border border-white/[0.08] hover:border-white/15 hover:shadow-[0_4px_40px_rgba(255,255,255,0.03)]"
               }`}
-              style={{ transformStyle: "preserve-3d" }}
-              onMouseMove={(e) => handle3DTilt(e, e.currentTarget)}
-              onMouseLeave={(e) => handleTiltReset(e.currentTarget)}
+              style={{
+                background: plan.highlighted
+                  ? "linear-gradient(145deg, #1f1f1f 0%, #141414 50%, #0f0f0f 100%)"
+                  : "linear-gradient(145deg, #171717 0%, #121212 50%, #0e0e0e 100%)",
+              }}
             >
               {plan.badge && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="px-4 py-1 rounded-full bg-indigo-600 text-white text-xs font-semibold shimmer-badge">
+                  <div className="px-4 py-1 rounded-full bg-white text-black text-xs font-semibold">
                     {plan.badge}
                   </div>
                 </div>
@@ -133,14 +121,14 @@ export function Pricing() {
                 <span className="text-zinc-500">{plan.period}</span>
               </div>
 
-              <div className="text-indigo-400 text-sm font-medium bg-indigo-400/10 px-3 py-1.5 rounded-lg w-fit">
+              <div className="text-white/60 text-sm font-medium bg-white/[0.06] px-3 py-1.5 rounded-lg w-fit">
                 {plan.generations}
               </div>
 
               <ul className="space-y-3 flex-1">
                 {plan.features.map((f, j) => (
-                  <li key={j} className="flex items-center gap-2 text-zinc-300 text-sm">
-                    <Check className="size-4 text-indigo-400 shrink-0" />
+                  <li key={j} className="flex items-center gap-2 text-zinc-400 text-sm">
+                    <Check className="size-4 text-white/40 shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -148,10 +136,10 @@ export function Pricing() {
 
               <button
                 onClick={handlePlanClick}
-                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
                   plan.highlighted
-                    ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/25"
-                    : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                    ? "bg-white text-black hover:bg-white/90"
+                    : "bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/[0.1] group-hover:bg-white/[0.1]"
                 }`}
               >
                 {plan.cta}
