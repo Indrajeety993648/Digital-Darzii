@@ -20,3 +20,5 @@ ai-service/venv/
 .turbo/
 coverage/
 *.tsbuildinfo
+.vercel
+.env*

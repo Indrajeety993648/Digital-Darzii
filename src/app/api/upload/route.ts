@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +10,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
@@ -21,7 +18,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { error: "File too large. Maximum 10MB." },
@@ -29,24 +25,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-
-    // Generate unique filename
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
-    const filepath = path.join(uploadsDir, filename);
-
-    // Save file
-    const bytes = await file.arrayBuffer();
-    await writeFile(filepath, Buffer.from(bytes));
+    const blob = await put(`uploads/${Date.now()}-${file.name}`, file, {
+      access: "public",
+    });
 
     return NextResponse.json({
       success: true,
-      imageUrl: `/uploads/${filename}`,
+      imageUrl: blob.url,
     });
   } catch (err) {
     console.error("Upload error:", err);

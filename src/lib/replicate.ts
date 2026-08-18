@@ -10,9 +10,6 @@
  * localhost), and the result is downloaded by the caller so it survives after
  * Replicate's temporary output URL expires.
  */
-import { readFile } from "fs/promises";
-import path from "path";
-
 const REPLICATE_API = "https://api.replicate.com/v1";
 // Pinned official model — Replicate resolves the latest version automatically.
 const MODEL = "cuuupid/idm-vton";
@@ -38,21 +35,9 @@ function token(): string {
   return t;
 }
 
-const MIME: Record<string, string> = {
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".webp": "image/webp",
-};
-
-/** Convert a /public-relative path (or pass through an http URL) to a data URI. */
+/** Pass through URLs directly — Replicate fetches them from Vercel Blob. */
 export async function toDataUri(urlOrPath: string): Promise<string> {
-  if (urlOrPath.startsWith("http")) return urlOrPath;
-  const rel = urlOrPath.replace(/^\//, "");
-  const abs = path.join(process.cwd(), "public", rel);
-  const buf = await readFile(abs);
-  const mime = MIME[path.extname(abs).toLowerCase()] ?? "image/jpeg";
-  return `data:${mime};base64,${buf.toString("base64")}`;
+  return urlOrPath;
 }
 
 interface Prediction {

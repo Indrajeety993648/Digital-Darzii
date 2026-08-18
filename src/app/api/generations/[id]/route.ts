@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { del } from "@vercel/blob";
 import { db } from "@/lib/db";
-import { unlink } from "fs/promises";
-import path from "path";
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,8 +10,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     if (!gen) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (gen.resultImageUrl) {
-      const filePath = path.join(process.cwd(), "public", gen.resultImageUrl);
-      await unlink(filePath).catch(() => {});
+      await del(gen.resultImageUrl).catch(() => {});
     }
 
     await db.generationRequest.delete({ where: { id } });

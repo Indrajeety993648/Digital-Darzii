@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { runTryOn, ReplicateError, type TryOnStage } from "@/lib/replicate";
@@ -16,7 +15,6 @@ const generateSchema = z.object({
   seed: z.number().optional().default(42),
 });
 
-// Hard cap so a hung prediction never leaves a row stuck in "processing".
 const GENERATION_TIMEOUT_MS = 3 * 60 * 1000;
 
 async function processGeneration(generationId: string, data: z.infer<typeof generateSchema>) {
@@ -43,18 +41,19 @@ async function processGeneration(generationId: string, data: z.infer<typeof gene
       onStage: (stage) => { void setStage(stage); },
     });
 
-    // Persist the result locally (Replicate's output URL expires).
     const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
-    const filename = `${generationId}.${ext}`;
-    const resultsDir = path.join(process.cwd(), "public", "results");
-    await mkdir(resultsDir, { recursive: true });
-    await writeFile(path.join(resultsDir, filename), buffer);
+    const filename = `results/${generationId}.${ext}`;
+
+    const blob = await put(filename, buffer, {
+      access: "public",
+      contentType,
+    });
 
     await db.generationRequest.update({
       where: { id: generationId },
       data: {
         status: "completed",
-        resultImageUrl: `/results/${filename}`,
+        resultImageUrl: blob.url,
         processingStage: "done",
         processingTimeMs: Date.now() - startTime,
         completedAt: new Date(),
@@ -82,7 +81,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = generateSchema.parse(body);
 
-    // Credit / daily limit, scoped to a session cookie.
     let sessionId = req.cookies.get(SESSION_COOKIE)?.value;
     const isNewSession = !sessionId;
     if (!sessionId) sessionId = newSessionId();
@@ -107,7 +105,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Fire-and-forget; the result page polls /api/status/[id].
     processGeneration(generation.id, data).catch(console.error);
 
     const res = NextResponse.json({
